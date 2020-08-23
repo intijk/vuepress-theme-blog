@@ -42,10 +42,46 @@ export default {
       required: true,
     },
   },
+  created() {
+    this.prevTop = 0
+    this.ssr = true
+    if (typeof window != 'undefined') {
+      this.ssr = false
+      this.window = window
+      this.document = document
+    }
+    !this.ssr && this.window.addEventListener('scroll', this.handleScroll)
+  },
+  destroyed() {
+    !this.ssr && this.window.removeEventListener('scroll', this.handleScroll)
+  },
+  methods: {
+    handleScroll(event) {
+      if (this.ssr) {
+        return
+      }
+      const currentTop = this.document.getElementsByTagName('html')[0].scrollTop
+      let headerElem = this.$el.querySelector('.mobile-header-bar')
+      if (headerElem) {
+        if (currentTop - this.prevTop > 0) {
+          //hide
+          headerElem.classList.add('h-is-hidden')
+        } else {
+          //show
+          headerElem.classList.remove('h-is-hidden')
+        }
+      }
+      this.prevTop = currentTop
+    },
+  },
 }
 </script>
 
 <style lang="stylus">
+.h-is-hidden{
+  transform: translateY(-100%);
+}
+
 .mobile-header-bar
   font-family PT Serif, Serif
   z-index 12
